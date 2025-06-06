@@ -37,7 +37,8 @@ function MostarDatos(datos){
                 <td>${integrante.correo}</td>
                 <td>    
                     <button>Editar</button>
-                    <button>Eliminar</button>
+                    <button onclick="EliminarPersona(${integrante.id})">Eliminar</button>
+                    
                 </td>
             <tr>
         `;
@@ -47,6 +48,82 @@ function MostarDatos(datos){
 ObtenerIntegrantes();
 
 
+
+
+
+//Proceso para agregar unh nuevo integrante
+const modal = document.getElementById("mdAgregar"); //cuadro de dialogo
+const btnAgregar = document.getElementById("btnAgregar"); //Boton para agregar registro
+const btnCerrra = document.getElementById("btnCerrar"); //Boton para cerrar registro
+
+
+btnAgregar.addEventListener("click", ()=>{
+    modal.showModal(); //abrir el modal al hacer clic en el boton
+});
+
+
+btnCerrar.addEventListener("click", ()=>{
+    modal.close();
+});
+
+//Agregar nuevo integrante desde el formulario 
+document.getElementById("frmAgregar").addEventListener("submit", async e => {
+    e.preventDefault();//"e" representa a "submit". evita que el formulario se envie de un solo.
+
+
+    //Capturara los valores del formulario
+    const nombre = document.getElementById("txtNombre").value.trim();
+    const apellido = document.getElementById("txtApellido").value.trim();
+    const correo = document.getElementById("txtEmail").value.trim();
+
+
+    //Validacion basica 
+    if(!nombre || !apellido || !correo){
+        alert("ingrese los valroes correctamente");
+        return; //Para evitar que el codigo se siga ejecutando
+    }
+
+    //Llamar a la API para enviar el registro
+    const respuesta = await fetch(API_URL, {
+        method: "POST", //Tipo de solicitud
+        headers:{'Content-Type' : 'application/json'}, //Tipo de datos Enviados
+        body: JSON.stringify({nombre,apellido,correo})//Datos Enviados
+    });
+
+    //Verificar si la API Responde que los datos fueron enviados correctamente
+    if(respuesta.ok){
+        alert("El registro fue agregado correctamente");
+
+        //Limpiar el formulario
+        document.getElementById("frmAgregar").reset();
+
+        //Cerrar el modal (dialog)
+        modal.close();
+
+        //Recargar la tabla 
+        ObtenerIntegrantes();
+    }
+    else{ //En caso de que la API devuelva un codigo diferente a 200-299
+        alert("El registro no pudo ser agregado");
+    }
+});
+
+
+//Funcion para borrar Registros 
+async  function EliminarPersona(id){
+    const confirmacion = confirm("¿Realmente quieres Eliminar el registro?");
+
+    //Validamos si el usuario si escogio borrar 
+    if(confirmacion){
+       await fetch(`${API_URL}/${id}`, {
+        method: "DELETE"
+       });   
+
+       //Recargar la tabla despues de liminar
+
+       ObtenerIntegrantes();
+    }
+}
 
 
 
